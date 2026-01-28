@@ -53,7 +53,7 @@ float SvR = 0;  // get normalized value right joystick X
 
 #define TB2_STBY 33
 
-// Diag in case 1 motors is in wrong dir, 1 forward -1 backward
+// Diag in case 1 motor is in the wrong direction, 1 forward, -1 backward
 #define OFFSET_FL 1
 #define OFFSET_FR -1
 #define OFFSET_RL 1
@@ -68,13 +68,13 @@ Motor motorRR(RR_BIN1, RR_BIN2, RR_PWMB, OFFSET_RR, TB2_STBY, 5000, 8, 4);
 
 // ====================== MOTOR CONTROL ==========================
 
-const int MAX_WHEEL_SPEED = 255; //change max pmw value here, max 255.
+const int MAX_WHEEL_SPEED = 255; //change max pwn value here, max 255.
 const float ACCEL_RATE = 0.1; // for not putting power in an instant.
 const int DEADZONE = 40; // controller deadzone
 const float SNAP_ANGLE = 15.0; // drive assists in deg
 const int JOY_MAX = 512; // max value of controller in 1 dir
 
-// Infrom control variables
+//Inform control variables
 float targetSpeeds[4] = {0,0,0,0};
 float currentSpeeds[4] = {0,0,0,0};
 float diag[4];
@@ -176,7 +176,7 @@ void processGamepad(ControllerPtr ctl) {
         overallSpeedMagnitude=1; 
         }
 
-    // Controls using XYAB button - test each wheels
+    // Controls using XYAB button - test each wheel
     else if (btnY) { wFR=1; strcpy(motorMode,"FR"); overallSpeedMagnitude=1; }
     else if (btnA) { wFL=1; strcpy(motorMode,"FL"); overallSpeedMagnitude=1; }
     else if (btnX) { wRL=1; strcpy(motorMode,"RL"); overallSpeedMagnitude=1; }
@@ -329,7 +329,7 @@ void setup() {
         for(;;);
     }
     
-    pinMode(TB1_STBY, OUTPUT); digitalWrite(TB1_STBY, HIGH); // remember to set to high otherwise the tb wont be turned on
+    pinMode(TB1_STBY, OUTPUT); digitalWrite(TB1_STBY, HIGH); // remember to set to high otherwise the tb won't be turned on
     pinMode(TB2_STBY, OUTPUT); digitalWrite(TB2_STBY, HIGH);
 
     display.clearDisplay(); 
