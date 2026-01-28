@@ -5,7 +5,7 @@ This project uses the following libraries:
 - <Bluepad32.h>        by https://github.com/ricardoquesada/bluepad32
 - <Adafruit_GFX.h>     by https://github.com/adafruit/Adafruit-GFX-Library
 - <Adafruit_SSD1306.h> by https://github.com/adafruit/Adafruit_SSD1306
-
+  **AI tools were used for debugging and code review**
 
 // Component list
 
@@ -42,4 +42,4 @@ MAX_WHEEL_SPEED; ACCEL_RATE; DEADZONE; SNAP_ANGLE; JOY_MAX;
 
 
 
-  **AI tools were used for debugging and code review**
+
