@@ -27,7 +27,7 @@ Wiring is based on the provided schematic.
 - Forward/Backward can be inverted using a button on the controller.
 
 
-// How to use the software
+// How to use the variables
 
 There are 5 variables that you need to care about
 MAX_WHEEL_SPEED; ACCEL_RATE; DEADZONE; SNAP_ANGLE; JOY_MAX;
