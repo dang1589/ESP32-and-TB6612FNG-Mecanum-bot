@@ -1,11 +1,14 @@
 // Credits
+
 This project uses the following libraries:
 - <TB6612_ESP32.h>     by https://github.com/pablopeza/TB6612FNG_ESP32
 - <Bluepad32.h>        by https://github.com/ricardoquesada/bluepad32
 - <Adafruit_GFX.h>     by https://github.com/adafruit/Adafruit-GFX-Library
 - <Adafruit_SSD1306.h> by https://github.com/adafruit/Adafruit_SSD1306
 
+
 // Component list
+
 - ESP32 DEVKIT V1
 - TB6612FNG x2
 - 12V motors x4 (Testing using JGA25-370 at 280rpm)
@@ -15,13 +18,17 @@ This project uses the following libraries:
 
 Wiring is based on the provided schematic.
 
+
 // What this can do
+
 - Control using a Bluetooth controller via Bluepad32 (Testing using Gamesir Nova 2 Lite).
 - Variable speed based on controller's XY input.
 - Full 360 deg straffle using mecanum control algorithm (src: https://youtu.be/gnSW2QpkGXQ?si=y35pBZLBLJ-lp8x8).
 - Forward/Backward can be inverted using a button on the controller.
 
+
 // How to use the software
+
 There are 5 variables that you need to care about
 MAX_WHEEL_SPEED; ACCEL_RATE; DEADZONE; SNAP_ANGLE; JOY_MAX;
 
@@ -30,6 +37,8 @@ MAX_WHEEL_SPEED; ACCEL_RATE; DEADZONE; SNAP_ANGLE; JOY_MAX;
 - DEADZONE        : Prevent stickdrift in controllers.
 - SNAP_ANGLE      : Provide assistance for driving in 4 main directions (Forward, Backward, Strafle Left, Strafle Right).
 - JOY_MAX         : Joystick max value, usually 512.
+
+
 
 
 
