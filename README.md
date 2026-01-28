@@ -18,7 +18,7 @@ Wiring is based on the provided schematic.
 // What this can do
 - Control using a Bluetooth controller via Bluepad32 (Testing using Gamesir Nova 2 Lite).
 - Variable speed based on controller's XY input.
-- Full 360 deg straffle using mecanum control algorithm.
+- Full 360 deg straffle using mecanum control algorithm (src: https://youtu.be/gnSW2QpkGXQ?si=y35pBZLBLJ-lp8x8).
 - Forward/Backward can be inverted using a button on the controller.
 
 // How to use the software
