@@ -1,4 +1,4 @@
-// LAST UPDATE 28/01/26
+// LAST UPDATE 04/02/26
 // BY DAG
 
 #include <Arduino.h>
@@ -18,7 +18,7 @@ bool headingInverted = false;
 Adafruit_SSD1306 display(128, 64, &Wire, -1);
 
 // Screen modes
-enum DisplayMode { DISP_NORMAL, DISP_DEBUG };
+enum DisplayMode { DISP_NORMAL, DISP_DEBUG, DISP_PWM};
 DisplayMode currentDisplay = DISP_NORMAL;
 // Controller
 ControllerPtr myControllers[BP32_MAX_GAMEPADS];
@@ -53,7 +53,7 @@ float SvR = 0;  // get normalized value right joystick X
 
 #define TB2_STBY 33
 
-// Diag in case 1 motor is in the wrong direction, 1 forward, -1 backward
+// Diag in case 1 motors is in wrong dir, 1 forward -1 backward
 #define OFFSET_FL 1
 #define OFFSET_FR -1
 #define OFFSET_RL 1
@@ -68,13 +68,13 @@ Motor motorRR(RR_BIN1, RR_BIN2, RR_PWMB, OFFSET_RR, TB2_STBY, 5000, 8, 4);
 
 // ====================== MOTOR CONTROL ==========================
 
-const int MAX_WHEEL_SPEED = 255; //change max pwn value here, max 255.
-const float ACCEL_RATE = 0.1; // for not putting power in an instant.
+int MAX_WHEEL_SPEED = 255; //change max pwm value here, max 255.
+const float ACCEL_RATE = 0.08; // for not putting power in an instant.
 const int DEADZONE = 40; // controller deadzone
-const float SNAP_ANGLE = 15.0; // drive assists in deg
+const float SNAP_ANGLE = 20.0; // drive assists in deg
 const int JOY_MAX = 512; // max value of controller in 1 dir
 
-//Inform control variables
+// Infrom control variables
 float targetSpeeds[4] = {0,0,0,0};
 float currentSpeeds[4] = {0,0,0,0};
 float diag[4];
@@ -107,13 +107,32 @@ void processGamepad(ControllerPtr ctl) {
     uint8_t dpad = ctl->dpad();                                                 // dpad - pivoting 1 wheels
     bool btnY = ctl->y(), btnA = ctl->a(), btnX = ctl->x(), btnB = ctl->b();    // XYAB buttons - Testing or 1 wheel control
     bool btnL3 = ctl->thumbL();                                                 // L3 button to swap main heading
-   
+    bool btnLB = ctl->l1();                                                     // Left bumper
+    bool btnRB = ctl->r1();                                                     // Right bumper
+    
     // filter L3 button pressed
     static bool lastL3 = false;
     if (btnL3 && !lastL3) {
     headingInverted = !headingInverted;
     }
     lastL3 = btnL3;
+    
+    // PWM adjust
+    static bool lastLB = false;
+    static bool lastRB = false;
+
+    if (btnRB && !lastRB) {
+        MAX_WHEEL_SPEED += 10;
+    }
+
+    if (btnLB && !lastLB) {
+        MAX_WHEEL_SPEED -= 10;
+    }
+    // Range
+    MAX_WHEEL_SPEED = constrain(MAX_WHEEL_SPEED, 155, 255);
+
+    lastLB = btnLB;
+    lastRB = btnRB;
     
     // -------- Deadzone / Adjust in Motor Controls ----------
     float vX = (abs(lx) < DEADZONE) ? 0 : (float)lx / JOY_MAX;
@@ -161,8 +180,12 @@ void processGamepad(ControllerPtr ctl) {
     overallSpeedMagnitude = 0;
 
     // Screen modes select
-    if (dpad & DPAD_UP) {currentDisplay = DISP_NORMAL;} 
-    else if (dpad & DPAD_DOWN) {currentDisplay = DISP_DEBUG;}
+    if (dpad & DPAD_UP) {
+    currentDisplay = (DisplayMode)((currentDisplay + 1) % 3);
+    }
+    else if (dpad & DPAD_DOWN) {
+    currentDisplay = (DisplayMode)((currentDisplay + 2) % 3); 
+    }
 
     // D-PAD pivoting
     if (dpad & DPAD_LEFT) { 
@@ -176,7 +199,7 @@ void processGamepad(ControllerPtr ctl) {
         overallSpeedMagnitude=1; 
         }
 
-    // Controls using XYAB button - test each wheel
+    // Controls using XYAB button - test each wheels
     else if (btnY) { wFR=1; strcpy(motorMode,"FR"); overallSpeedMagnitude=1; }
     else if (btnA) { wFL=1; strcpy(motorMode,"FL"); overallSpeedMagnitude=1; }
     else if (btnX) { wRL=1; strcpy(motorMode,"RL"); overallSpeedMagnitude=1; }
@@ -219,13 +242,26 @@ void updateDisplay() {
     // Debug mode
     if (currentDisplay == DISP_DEBUG) {
         display.setCursor(0,0);
-        display.printf("Mode: %s\n", motorMode);
+        display.printf("Mode: %s\n %3d", motorMode, MAX_WHEEL_SPEED);
         display.printf("LX:%+.2f LY:%+.2f RX:%+.2f\n", SvX, SvY, SvR); // joystick normalized
         display.printf("FL:%4.1f/%4.1f\n", currentSpeeds[0], targetSpeeds[0]);
         display.printf("FR:%4.1f/%4.1f\n", currentSpeeds[1], targetSpeeds[1]);
         display.printf("RL:%4.1f/%4.1f\n", currentSpeeds[2], targetSpeeds[2]);
         display.printf("RR:%4.1f/%4.1f\n", currentSpeeds[3], targetSpeeds[3]);
-    } 
+    }
+    else if (currentDisplay == DISP_PWM) {
+
+        display.clearDisplay();
+        display.setTextColor(WHITE);
+
+        display.setTextSize(2);
+        display.setCursor(35, 0);
+        display.println("PWM");
+
+        display.setTextSize(3);
+        display.setCursor(20, 25);
+        display.printf("%3d", MAX_WHEEL_SPEED);
+    }
     else { 
         // Disconnected
         bool hasController = false;
@@ -248,10 +284,11 @@ void updateDisplay() {
             }
 
             display.setCursor(0, 0);
-            display.printf("M:%s %s %.2f",
+            display.printf("%s %s %.2f %3d",
                 motorMode,
                 headingInverted ? "INV" : "NOR",
-                moveAngle
+                moveAngle,
+                MAX_WHEEL_SPEED
             );
 
             // Overall Speed
@@ -329,7 +366,7 @@ void setup() {
         for(;;);
     }
     
-    pinMode(TB1_STBY, OUTPUT); digitalWrite(TB1_STBY, HIGH); // remember to set to high otherwise the tb won't be turned on
+    pinMode(TB1_STBY, OUTPUT); digitalWrite(TB1_STBY, HIGH); // remember to set to high otherwise the tb wont be turned on
     pinMode(TB2_STBY, OUTPUT); digitalWrite(TB2_STBY, HIGH);
 
     display.clearDisplay(); 
